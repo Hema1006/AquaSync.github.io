@@ -1,0 +1,1455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Water Allocation System</title>
+    <style>
+        :root {
+            --primary-color: #2684ff;
+            --secondary-color: #36b37e;
+            --tertiary-color: #ff5630;
+            --light-color: #f4f5f7;
+            --dark-color: #172b4d;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f9fafb;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+        
+        h2, h3 {
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+        
+        .data-section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .input-with-button {
+            display: flex;
+            gap: 0.5rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e1e4e8;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #0052cc;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card h3 {
+            margin-bottom: 0.5rem;
+        }
+        
+        .card p {
+            color: #5e6c84;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .resource-bar {
+            background-color: #e9ecef;
+            border-radius: 20px;
+            height: 24px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        
+        .resource-fill {
+            height: 100%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: width 1.5s ease-in-out;
+        }
+        
+        .agriculture {
+            background-color: var(--secondary-color);
+        }
+        
+        .drinking {
+            background-color: var(--primary-color);
+        }
+        
+        .industry {
+            background-color: var(--tertiary-color);
+        }
+        
+        .recommendation {
+            background-color: #f4f5f7;
+            border-radius: 5px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .recommendation h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .recommendation p {
+            margin-bottom: 0.5rem;
+        }
+        
+        .forecast-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 1rem;
+            padding: 0.5rem 0;
+        }
+        
+        .forecast-item {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 1rem;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        .day {
+            font-weight: bold;
+        }
+        
+        .date {
+            font-size: 0.8rem;
+            color: #5e6c84;
+            margin-bottom: 0.5rem;
+        }
+        
+        .temp {
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+        
+        .humidity {
+            font-size: 0.8rem;
+            color: #5e6c84;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: auto;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 900px;
+            animation: modalSlide 0.3s ease-out;
+        }
+        
+        @keyframes modalSlide {
+            from {transform: translateY(-50px); opacity: 0;}
+            to {transform: translateY(0); opacity: 1;}
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: var(--dark-color);
+        }
+        
+        .chart-container {
+            height: 300px;
+            margin-bottom: 1.5rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+        
+        th, td {
+            text-align: left;
+            padding: 0.75rem;
+            border-bottom: 1px solid #e1e4e8;
+        }
+        
+        th {
+            background-color: #f4f5f7;
+            font-weight: 600;
+        }
+        
+        .location-display {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .location-display img {
+            width: 70px;
+            height: 70px;
+        }
+        
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+        }
+        
+        .detail-item {
+            background-color: #f4f5f7;
+            padding: 0.75rem;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .label {
+            font-size: 0.8rem;
+            color: #5e6c84;
+        }
+        
+        .value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-top: 0.25rem;
+        }
+        
+        .alert {
+            background-color: #ffe9e3;
+            color: #c4320a;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            gap: 1rem;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {transform: rotate(360deg);}
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-with-button {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .input-with-button button {
+                margin-top: 0.5rem;
+            }
+            
+            .modal-content {
+                width: 95%;
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="data-section">
+            <h2>Current Water Allocation</h2>
+            <div class="input-with-button">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label for="location">Location:</label>
+                    <input type="text" id="location" placeholder="Enter city or region (e.g., New York, London, Tokyo)">
+                </div>
+                <button id="fetchData">Fetch Data</button>
+            </div>
+            
+            <div id="weatherInfo" style="margin-top: 1.5rem;"></div>
+        </div>
+        
+        <div class="dashboard">
+            <div class="card">
+                <h3>Agriculture Allocation</h3>
+                <p>Current allocation based on crop needs and seasonal requirements</p>
+                <div class="resource-bar">
+                    <div class="resource-fill agriculture" style="width: 60%;">60%</div>
+                </div>
+                <div id="agricultureRecommendation" class="recommendation">
+                    <strong>Awaiting location data...</strong>
+                    <p>Enter a location above to receive AI-driven recommendations based on local weather patterns.</p>
+                </div>
+                <button onclick="openModal('agricultureModal')">View Details</button>
+            </div>
+            
+            <div class="card">
+                <h3>Drinking Water Allocation</h3>
+                <p>Priority allocation for human consumption needs</p>
+                <div class="resource-bar">
+                    <div class="resource-fill drinking" style="width: 25%;">25%</div>
+                </div>
+                <div id="drinkingRecommendation" class="recommendation">
+                    <strong>Awaiting location data...</strong>
+                    <p>Enter a location above to receive AI-driven recommendations based on local weather patterns.</p>
+                </div>
+                <button onclick="openModal('drinkingModal')">View Details</button>
+            </div>
+            
+            <div class="card">
+                <h3>Industrial Allocation</h3>
+                <p>Optimized allocation based on industry type and water recycling capability</p>
+                <div class="resource-bar">
+                    <div class="resource-fill industry" style="width: 15%;">15%</div>
+                </div>
+                <div id="industryRecommendation" class="recommendation">
+                    <strong>Awaiting location data...</strong>
+                    <p>Enter a location above to receive AI-driven recommendations based on local weather patterns.</p>
+                </div>
+                <button onclick="openModal('industryModal')">View Details</button>
+            </div>
+        </div>
+        
+        <div class="data-section">
+            <h2>Weather Forecast & Water Predictions</h2>
+            <div class="forecast-container" id="forecastContainer">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Enter a location to view forecast data</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="data-section">
+            <h2>Resource Optimization</h2>
+            <div class="form-group">
+                <label for="scenario">Scenario Planning:</label>
+                <select id="scenario">
+                    <option value="normal">Normal Conditions</option>
+                    <option value="drought">Drought Conditions</option>
+                    <option value="flood">Excess Rainfall</option>
+                </select>
+            </div>
+            <button id="runScenario">Run Scenario</button>
+            <div id="scenarioResults" class="recommendation" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <!-- Modals -->
+    <div id="agricultureModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('agricultureModal')">&times;</span>
+            <h2>Agriculture Water Allocation Details</h2>
+            
+            <div class="chart-container" id="agricultureChart">
+                <img src="agrii.avif" alt="Agriculture Water Allocation Chart" style="width:100%; height:100%";> 
+            </div>
+            <table>
+                <tr>
+                    <th>Crop Type</th>
+                    <th>Water Requirement</th>
+                    <th>Current Allocation</th>
+                    <th>Recommended Allocation</th>
+                </tr>
+                <tr>
+                    <td>Rice</td>
+                    <td>High</td>
+                    <td>45%</td>
+                    <td>40%</td>
+                </tr>
+                <tr>
+                    <td>Wheat</td>
+                    <td>Medium</td>
+                    <td>30%</td>
+                    <td>25%</td>
+                </tr>
+                <tr>
+                    <td>Vegetables</td>
+                    <td>Medium</td>
+                    <td>20%</td>
+                    <td>25%</td>
+                </tr>
+                <tr>
+                    <td>Fruits</td>
+                    <td>Low</td>
+                    <td>5%</td>
+                    <td>10%</td>
+                </tr>
+            </table>
+            <div class="recommendation">
+                <h3>AI Recommendations:</h3>
+                <div id="agricultureAIRecs">
+                    <ul>
+                        <li>Implement drip irrigation for vegetable crops to reduce water usage by 30%</li>
+                        <li>Shift 5% of water allocation from rice to more water-efficient crops</li>
+                        <li>Schedule irrigation during early morning or late evening to reduce evaporation</li>
+                        <li>Install soil moisture sensors to optimize irrigation timing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="drinkingModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('drinkingModal')">&times;</span>
+            <h2>Drinking Water Allocation Details</h2>
+            <div class="chart-container" id="drinkingChart">
+                <img src="drinkwater.avif" alt="Drinking Water Allocation Chart" style="width:100%; height:100%";>
+            </div>
+            <table>
+                <tr>
+                    <th>District</th>
+                    <th>Population</th>
+                    <th>Current Supply (MLD)</th>
+                    <th>Recommended Supply (MLD)</th>
+                </tr>
+                <tr>
+                    <td>North</td>
+                    <td>250,000</td>
+                    <td>45</td>
+                    <td>50</td>
+                </tr>
+                <tr>
+                    <td>South</td>
+                    <td>320,000</td>
+                    <td>60</td>
+                    <td>65</td>
+                </tr>
+                <tr>
+                    <td>East</td>
+                    <td>180,000</td>
+                    <td>35</td>
+                    <td>40</td>
+                </tr>
+                <tr>
+                    <td>West</td>
+                    <td>210,000</td>
+                    <td>40</td>
+                    <td>45</td>
+                </tr>
+            </table>
+            <div class="recommendation">
+                <h3>AI Recommendations:</h3>
+                <div id="drinkingAIRecs">
+                    <ul>
+                        <li>Increase water treatment capacity in North district by 10%</li>
+                        <li>Implement water-saving campaigns in high-consumption areas</li>
+                        <li>Repair leaking pipelines in East district to reduce 15% water loss</li>
+                        <li>Install smart water meters in all districts for real-time monitoring</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="industryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('industryModal')">&times;</span>
+            <h2>Industrial Water Allocation Details</h2>
+            <div class="chart-container" id="industryChart">
+                <img src="industri.avif" alt="Drinking Water Allocation Chart" style="width:100%; height:100%";>
+            </div>
+            <table>
+                <tr>
+                    <th>Industry Type</th>
+                    <th>Water Usage</th>
+                    <th>Current Allocation</th>
+                    <th>Recommended Allocation</th>
+                </tr>
+                <tr>
+                    <td>Textiles</td>
+                    <td>High</td>
+                    <td>35%</td>
+                    <td>25%</td>
+                </tr>
+                <tr>
+                    <td>Food Processing</td>
+                    <td>Medium</td>
+                    <td>30%</td>
+                    <td>30%</td>
+                </tr>
+                <tr>
+                    <td>Chemical</td>
+                    <td>High</td>
+                    <td>25%</td>
+                    <td>20%</td>
+                </tr>
+                <tr>
+                    <td>Electronics</td>
+                    <td>Low</td>
+                    <td>10%</td>
+                    <td>15%</td>
+                </tr>
+            </table>
+            <div class="recommendation">
+                <h3>AI Recommendations:</h3>
+                <div id="industryAIRecs">
+                    <ul>
+                        <li>Implement water recycling systems in textile industries to reduce consumption by 30%</li>
+                        <li>Encourage zero liquid discharge policies in chemical industries</li>
+                        <li>Provide incentives for water-efficient technology adoption</li>
+                        <li>Mandate water audits for high-consumption industries</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <script>
+        // OpenWeather API Key
+        const apiKey = '30b57a5487db153e1bdf17c1e9d33f44';
+        
+        // Gemini API Key
+        const geminiApiKey = 'AIzaSyDlIRYdegfbkLXq83OBIotfavhoXHqdHvE';
+        
+        // DOM Elements
+        const locationInput = document.getElementById('location');
+        const fetchDataBtn = document.getElementById('fetchData');
+        const weatherInfo = document.getElementById('weatherInfo');
+        const forecastContainer = document.getElementById('forecastContainer');
+        const scenarioSelect = document.getElementById('scenario');
+        const runScenarioBtn = document.getElementById('runScenario');
+        const scenarioResults = document.getElementById('scenarioResults');
+        
+        // AI recommendation elements
+        const agricultureAIRecs = document.getElementById('agricultureAIRecs');
+        const drinkingAIRecs = document.getElementById('drinkingAIRecs');
+        const industryAIRecs = document.getElementById('industryAIRecs');
+        
+        // Sample data for demonstration
+        const waterData = {
+            totalSupply: 1000, // in million liters
+            agriculture: {
+                allocation: 600,
+                efficiency: 0.65,
+                crops: {
+                    rice: { area: 10000, requirement: 1500 },
+                    wheat: { area: 8000, requirement: 800 },
+                    vegetables: { area: 5000, requirement: 600 },
+                    fruits: { area: 3000, requirement: 400 }
+                }
+            },
+            drinking: {
+                allocation: 250,
+                population: 950000,
+                perCapita: 135, // liters per person per day
+                districts: {
+                    north: { population: 250000, supply: 45 },
+                    south: { population: 320000, supply: 60 },
+                    east: { population: 180000, supply: 35 },
+                    west: { population: 210000, supply: 40 }
+                }
+            },
+            industry: {
+                allocation: 150,
+                recycling: 0.3,
+                types: {
+                    textiles: { usage: 52.5, efficiency: 0.5 },
+                    foodProcessing: { usage: 45, efficiency: 0.6 },
+                    chemical: { usage: 37.5, efficiency: 0.4 },
+                    electronics: { usage: 15, efficiency: 0.7 }
+                }
+            }
+        };
+        
+        // Weather data cache
+        let weatherData = null;
+        
+        // Chart objects
+        let agricultureChart, drinkingChart, industryChart;
+        
+        // Fetch weather data
+        fetchDataBtn.addEventListener('click', async () => {
+            const location = locationInput.value;
+            if (!location) {
+                weatherInfo.innerHTML = `<div class="alert">Please enter a location!</div>`;
+                return;
+            }
+            
+            try {
+                weatherInfo.innerHTML = `
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Fetching weather data for ${location}...</p>
+                    </div>
+                `;
+                
+                forecastContainer.innerHTML = `
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading forecast data...</p>
+                    </div>
+                `;
+                
+                // Reset recommendations to loading state
+                document.getElementById('agricultureRecommendation').innerHTML = `
+                    <div class="loading" style="padding: 1rem;">
+                        <div class="loading-spinner"></div>
+                        <p>Analyzing agricultural needs...</p>
+                    </div>
+                `;
+                
+                document.getElementById('drinkingRecommendation').innerHTML = `
+                    <div class="loading" style="padding: 1rem;">
+                        <div class="loading-spinner"></div>
+                        <p>Calculating drinking water needs...</p>
+                    </div>
+                `;
+                
+                document.getElementById('industryRecommendation').innerHTML = `
+                    <div class="loading" style="padding: 1rem;">
+                        <div class="loading-spinner"></div>
+                        <p>Evaluating industrial requirements...</p>
+                    </div>
+                `;
+                
+                // Fetch current weather data
+                const currentResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${location}&units=metric&appid=${apiKey}`);
+                
+                if (!currentResponse.ok) {
+                    throw new Error('Location not found. Please check the spelling and try again.');
+                }
+                
+                const currentData = await currentResponse.json();
+                
+                // Fetch forecast data
+                const forecastResponse = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${location}&units=metric&appid=${apiKey}`);
+                const forecastData = await forecastResponse.json();
+                
+                weatherData = {
+                    current: currentData,
+                    forecast: forecastData
+                };
+                
+                displayWeatherInfo(weatherData);
+                displayForecast(weatherData.forecast);
+                
+                // Calculate optimal allocation based on weather
+                const newAllocation = calculateOptimalAllocation(weatherData, waterData);
+                updateAllocationDisplay(newAllocation);
+                
+                // Generate and update recommendations
+                setTimeout(() => {
+                    updateRecommendations(weatherData);
+                    generateGeminiRecommendations(weatherData, waterData)
+                        .then(aiRecs => {
+                            updateDetailedRecommendations(aiRecs);
+                        })
+                        .catch(error => {
+                            console.error("Error with Gemini API:", error);
+                            // Fallback to local recommendations if Gemini API fails
+                            const fallbackRecs = getFallbackRecommendations(weatherData);
+                            updateDetailedRecommendations(fallbackRecs);
+                        });
+                }, 1000);
+                
+            } catch (error) {
+                weatherInfo.innerHTML = `<div class="alert">${error.message}</div>`;
+                forecastContainer.innerHTML = `<div class="alert">Error loading forecast data: ${error.message}</div>`;
+                document.getElementById('agricultureRecommendation').innerHTML = `<div class="alert">Error generating recommendations: ${error.message}</div>`;
+                document.getElementById('drinkingRecommendation').innerHTML = `<div class="alert">Error generating recommendations: ${error.message}</div>`;
+                document.getElementById('industryRecommendation').innerHTML = `<div class="alert">Error generating recommendations: ${error.message}</div>`;
+            }
+        });
+
+        // Display weather information with current date
+        function displayWeatherInfo(data) {
+            const current = data.current;
+            const currentDate = new Date();
+            
+            weatherInfo.innerHTML = `
+                <div class="location-display">
+                    <img src="https://openweathermap.org/img/wn/${current.weather[0].icon}@2x.png" alt="Weather Icon">
+                    <div>
+                        <h3>${current.name}, ${current.sys.country}</h3>
+                        <p>${currentDate.toLocaleDateString()} ${currentDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                    </div>
+                </div>
+                <div class="weather-details">
+                    <div class="detail-item">
+                        <div class="label">Temperature</div>
+                        <div class="value">${Math.round(current.main.temp)}°C</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">Humidity</div>
+                        <div class="value">${current.main.humidity}%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">Precipitation</div>
+                        <div class="value">${current.rain ? current.rain['1h'] || 0 : 0}mm</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="label">Wind Speed</div>
+                        <div class="value">${current.wind.speed} m/s</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Display weather forecast with accurate dates
+        function displayForecast(forecastData) {
+            const dailyForecast = {};
+            
+            forecastData.list.forEach(item => {
+                const date = new Date(item.dt * 1000).toLocaleDateString();
+                if (!dailyForecast[date]) {
+                    dailyForecast[date] = {
+                        temp: [],
+                        humidity: [],
+                        weather: item.weather[0],
+                        date: new Date(item.dt * 1000)
+                    };
+                }
+                dailyForecast[date].temp.push(item.main.temp);
+                dailyForecast[date].humidity.push(item.main.humidity);
+            });
+
+            const forecastHtml = Object.values(dailyForecast)
+                .slice(0, 5) // Show only next 5 days
+                .map(day => `
+                    <div class="forecast-item">
+                        <div class="day">${day.date.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                        <div class="date">${day.date.toLocaleDateString()}</div>
+                        <img src="https://openweathermap.org/img/wn/${day.weather.icon}@2x.png" alt="${day.weather.description}">
+                        <div class="temp">${Math.round(Math.min(...day.temp))}°/${Math.round(Math.max(...day.temp))}°</div>
+                        <div class="humidity">Humidity: ${Math.round(average(...day.humidity))}%</div>
+                    </div>
+                `).join('');
+                
+            forecastContainer.innerHTML = forecastHtml;
+        }
+
+        // Update water allocation display - animated transition
+        function updateAllocationDisplay(allocation) {
+            // Update the width and content of the progress bars with transition
+            const agricultureBar = document.querySelector('.agriculture');
+            const drinkingBar = document.querySelector('.drinking');
+            const industryBar = document.querySelector('.industry');
+            
+            // Update with animation
+            agricultureBar.style.width = `${allocation.agriculture}%`;
+            agricultureBar.textContent = `${allocation.agriculture}%`;
+            
+            drinkingBar.style.width = `${allocation.drinking}%`;
+            drinkingBar.textContent = `${allocation.drinking}%`;
+            
+            industryBar.style.width = `${allocation.industry}%`;
+            industryBar.textContent = `${allocation.industry}%`;
+        }
+
+        // Enhanced location-aware allocation function
+        function calculateOptimalAllocation(weatherData, waterData) {
+            const baseAllocation = { agriculture: 60, drinking: 25, industry: 15 };
+            const temp = weatherData.current.main.temp;
+            const humidity = weatherData.current.main.humidity;
+            const precipitation = weatherData.current.rain ? weatherData.current.rain['1h'] || 0 : 0;
+            const windSpeed = weatherData.current.wind.speed;
+            const location = weatherData.current.name.toLowerCase();
+            const country = weatherData.current.sys.country.toLowerCase();
+
+            // Region-specific adjustments
+            if (isUrbanCenter(location, country)) {
+                // Urban centers need more drinking water and industry
+                baseAllocation.drinking += 12;
+                baseAllocation.industry += 8;
+                baseAllocation.agriculture -= 20;
+            } else if (isAgriculturalRegion(location, country)) {
+                // Agricultural regions
+                baseAllocation.agriculture += 18;
+                baseAllocation.drinking -= 10;
+                baseAllocation.industry -= 8;
+            } else if (isAridRegion(location, country)) {
+                // Arid regions need careful water management
+                baseAllocation.drinking += 15;
+                baseAllocation.agriculture -= 12;
+                baseAllocation.industry -= 3;
+            }
+
+            // Weather-based adjustments
+            // Temperature adjustments - higher temp means more drinking water
+            if (temp > 30) {
+                baseAllocation.drinking += 7;
+                baseAllocation.agriculture -= 5;
+                baseAllocation.industry -= 2;
+            } else if (temp < 10) {
+                baseAllocation.industry += 5;
+                baseAllocation.agriculture -= 3;
+                baseAllocation.drinking -= 2;
+            }
+
+            // Humidity and precipitation adjustments
+            if (humidity < 30 || precipitation < 0.5) {
+                baseAllocation.agriculture += 8;
+                baseAllocation.drinking += 2;
+                baseAllocation.industry -= 10;
+            } else if (humidity > 80 || precipitation > 10) {
+                baseAllocation.agriculture -= 15;
+                baseAllocation.drinking -= 5;
+                baseAllocation.industry += 20; // More water available for industry
+            }
+
+            // Make sure percentages add up to 100%
+            const total = baseAllocation.agriculture + baseAllocation.drinking + baseAllocation.industry;
+            const ratio = 100 / total;
+            return {
+                agriculture: Math.round(baseAllocation.agriculture * ratio),
+                drinking: Math.round(baseAllocation.drinking * ratio),
+                industry: Math.round(baseAllocation.industry * ratio)
+            };
+        }
+
+        // Region classification helpers
+        function isUrbanCenter(location, country) {
+            const urbanCenters = [
+                'new york', 'london', 'tokyo', 'paris', 'beijing', 'delhi', 'mumbai',
+                'seoul', 'shanghai', 'mexico city', 'cairo', 'lagos', 'los angeles',
+                'chicago', 'toronto', 'sao paulo', 'moscow', 'sydney', 'berlin',
+                'madrid', 'rome', 'bangkok', 'jakarta', 'manila', 'singapore'
+            ];
+            return urbanCenters.some(city => location.includes(city.toLowerCase()));
+        }
+
+        function isAgriculturalRegion(location, country) {
+            const agriculturalRegions = {
+                // USA agricultural regions
+                'us': ['california', 'iowa', 'nebraska', 'kansas', 'texas', 'minnesota', 'illinois', 'wisconsin'],
+                // India agricultural regions
+                'in': ['punjab', 'haryana', 'uttar pradesh', 'bihar', 'west bengal', 'tamil nadu'],
+                // China agricultural regions
+                'cn': ['sichuan', 'henan', 'shandong', 'jiangsu'],
+                // European agricultural regions
+                'fr': ['normandy', 'brittany', 'champagne'],
+                'it': ['tuscany', 'lombardy', 'emilia-romagna'],
+                'es': ['andalusia', 'castile', 'valencia'],
+                // Australia
+                'au': ['murray-darling', 'wheatbelt', 'darling downs'],
+                // Brazil
+                'br': ['mato grosso', 'parana', 'sao paulo', 'goias'],
+                // Global terms
+                'global': ['farm', 'agriculture', 'rural', 'valley', 'plains', 'delta']
+            };
+            
+            // Check country-specific regions
+            if (agriculturalRegions[country]) {
+                if (agriculturalRegions[country].some(region => location.includes(region.toLowerCase()))) {
+                    return true;
+                }
+            }
+            
+            // Check global terms
+            return agriculturalRegions['global'].some(term => location.includes(term.toLowerCase()));
+        }
+
+        function isAridRegion(location, country) {
+            const aridRegions = {
+                // Middle East
+                'ae': true, 'sa': true, 'qa': true, 'kw': true, 'bh': true, 'om': true, 
+                // North Africa
+                'eg': ['sinai', 'sahara', 'desert'],
+                'ly': true, 'sd': true, 'dz': true, 'ma': ['sahara'],
+                // Australia arid regions
+                'au': ['outback', 'pilbara', 'kimberly', 'great sandy', 'gibson', 'simpson'],
+                // USA arid regions
+                'us': ['arizona', 'nevada', 'new mexico', 'utah', 'mojave', 'sonoran'],
+                // Other major arid regions
+                'global': ['desert', 'arid', 'dry', 'sahara', 'sahel', 'gobi', 'kalahari', 'atacama']
+            };
+            
+            // Check if entire country is arid
+            if (aridRegions[country] === true) {
+                return true;
+            }
+            
+            // Check country-specific regions
+            if (aridRegions[country]) {
+                if (aridRegions[country].some(region => location.includes(region.toLowerCase()))) {
+                    return true;
+                }
+            }
+            
+            // Check global terms
+            return aridRegions['global'].some(term => location.includes(term.toLowerCase()));
+        }
+        
+        // Function to update recommendations based on location and weather
+        function updateRecommendations(weatherData) {
+            const current = weatherData.current;
+            const temp = current.main.temp;
+            const humidity = current.main.humidity;
+            const precipitation = current.rain ? current.rain['1h'] || 0 : 0;
+            const windSpeed = current.wind.speed;
+            const location = current.name;
+            const country = current.sys.country;
+            
+            // Agriculture recommendations
+            let agricultureRec = '';
+            if (temp > 30 && humidity < 40) {
+                agricultureRec = `<strong>High Temperature Alert:</strong> Current temperature of ${temp}°C with ${humidity}% humidity in ${location} increases evaporation.
+                <p>Modify irrigation schedules to early morning/evening. Consider deep irrigation methods and mulching for water conservation.</p>`;
+            } else if (precipitation > 5) {
+                agricultureRec = `<strong>High Precipitation:</strong> Current rainfall of ${precipitation}mm in ${location} means reduced irrigation needed.
+                <p>Consider harvesting excess rainwater for future use and implement drainage systems to prevent waterlogging.</p>`;
+            } else if (temp < 10) {
+                agricultureRec = `<strong>Low Temperature Alert:</strong> Current temperature of ${temp}°C in ${location} means slower evaporation and plant uptake.
+                <p>Reduce irrigation frequency while protecting crops from frost. Consider greenhouses for sensitive crops.</p>`;
+            } else {
+                agricultureRec = `<strong>Moderate Conditions:</strong> Current conditions in ${location} (${temp}°C, ${humidity}% humidity) are suitable for standard irrigation.
+                <p>Monitor soil moisture levels and follow regular crop water requirements.</p>`;
+            }
+            
+            // Drinking water recommendations
+            let drinkingRec = '';
+            if (temp > 30) {
+                drinkingRec = `<strong>Heat Wave Alert:</strong> Current temperature of ${temp}°C in ${location} increases daily water consumption.
+                <p>Increase supply by 15% in residential areas. Establish cooling centers with water stations in public spaces.</p>`;
+            } else if (isUrbanCenter(location.toLowerCase(), country.toLowerCase())) {
+                drinkingRec = `<strong>Urban Demand:</strong> ${location} as an urban center has higher per-capita consumption.
+                <p>Prioritize drinking water allocation by 10% and implement peak hour management strategies.</p>`;
+            } else if (isAridRegion(location.toLowerCase(), country.toLowerCase())) {
+                drinkingRec = `<strong>Water Scarcity Alert:</strong> ${location} is in an arid region with limited resources.
+                <p>Implement conservation measures and consider supplementary sources like desalination or water imports.</p>`;
+            } else {
+                drinkingRec = `<strong>Standard Allocation:</strong> Current conditions in ${location} suggest normal drinking water demand.
+                <p>Maintain regular supply schedules while monitoring quality parameters.</p>`;
+            }
+            
+            // Industry recommendations
+            let industryRec = '';
+            if (isUrbanCenter(location.toLowerCase(), country.toLowerCase())) {
+                industryRec = `<strong>Industrial Zone:</strong> ${location} has significant industrial activity requiring optimized water use.
+                <p>Prioritize recycling systems and incentivize water-efficient technologies for manufacturing.</p>`;
+            } else if (precipitation < 1 && temp > 25) {
+                industryRec = `<strong>Water Stress Alert:</strong> Low precipitation (${precipitation}mm) and high temperature (${temp}°C) in ${location} indicates water stress.
+                <p>Reduce non-essential industrial allocations by 20% and enforce recycling requirements.</p>`;
+            } else if (precipitation > 10) {
+                industryRec = `<strong>Excess Water Available:</strong> High precipitation (${precipitation}mm) in ${location} allows for increased industrial use.
+                <p>Consider temporary allocation increase for industries with high recovery systems.</p>`;
+            } else {
+                industryRec = `<strong>Balanced Allocation:</strong> Current conditions in ${location} support standard industrial water use.
+                <p>Maintain regular allocation while encouraging efficiency improvements.</p>`;
+            }
+            
+            // Update recommendation displays
+            document.getElementById('agricultureRecommendation').innerHTML = agricultureRec;
+            document.getElementById('drinkingRecommendation').innerHTML = drinkingRec;
+            document.getElementById('industryRecommendation').innerHTML = industryRec;
+        }
+
+        // Integrating with Gemini API for advanced recommendations
+        async function generateGeminiRecommendations(weatherData, waterData) {
+            const current = weatherData.current;
+            const location = current.name;
+            const temp = current.main.temp;
+            const humidity = current.main.humidity;
+            const precipitation = current.rain ? current.rain['1h'] || 0 : 0;
+            const windSpeed = current.wind.speed;
+            const conditions = current.weather[0].description;
+            
+            // Create context for Gemini API
+            const prompt = `
+                Generate water resource allocation recommendations for ${location} with the following conditions:
+                - Temperature: ${temp}°C
+                - Humidity: ${humidity}%
+                - Precipitation: ${precipitation}mm
+                - Wind: ${windSpeed}m/s
+                - Weather Conditions: ${conditions}
+                
+                Generate three separate recommendations for:
+                1. Agriculture water usage (considering crop types, irrigation methods, and seasonal needs)
+                2. Drinking water supply (considering population, demand, and infrastructure)
+                3. Industrial water allocation (considering industry types, recycling potential, and efficiency)
+                
+                Format each as a list of 4 specific, actionable recommendations.
+            `;
+            
+            try {
+                // Note: In a real implementation, this would make an actual API call to Gemini
+                // For demonstration, we'll simulate the API response
+                const response = await simulateGeminiAPI(prompt, weatherData);
+                return response;
+            } catch (error) {
+                console.error("Error calling Gemini API:", error);
+                throw error;
+            }
+        }
+        
+        // Simulate Gemini API for demonstration
+        async function simulateGeminiAPI(prompt, weatherData) {
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            const current = weatherData.current;
+            const location = current.name;
+            const temp = current.main.temp;
+            const humidity = current.main.humidity;
+            const isRaining = current.weather[0].main.toLowerCase().includes('rain');
+            const isHot = temp > 28;
+            const isDry = humidity < 40;
+            const isCold = temp < 10;
+            
+            // Generate dynamic, weather-specific recommendations
+            const recommendations = {
+                agriculture: [
+                    isHot && isDry ? 
+                        `Implement night irrigation schedules in ${location} to reduce evaporation losses by up to 30%` : 
+                        `Adjust irrigation timing based on ${location}'s ${temp}°C temperature to optimize water uptake`,
+                    isRaining ? 
+                        `Temporarily reduce irrigation in ${location} to account for natural precipitation of ${current.rain ? current.rain['1h'] : 0}mm` : 
+                        `Increase mulching depth to 3-4 inches to retain soil moisture given current ${humidity}% humidity`,
+                    isCold ? 
+                        `Protect irrigation systems from freezing with insulation as ${location} temperatures are below 10°C` : 
+                        `Implement drip irrigation for row crops to reduce water usage by 25% in current conditions`,
+                    isHot ? 
+                        `Prioritize heat-resistant crop varieties suitable for ${location}'s current ${temp}°C temperatures` : 
+                        `Install soil moisture sensors at 6-inch depth intervals to optimize irrigation decisions`
+                ],
+                drinking: [
+                    isHot ? 
+                        `Increase water supply by 15% to residential areas in ${location} during peak heat hours (11AM-4PM)` : 
+                        `Maintain standard supply to ${location} while monitoring consumption patterns`,
+                    isDry ? 
+                        `Deploy mobile water stations in public areas of ${location} during current dry conditions` : 
+                        `Implement pressure management to reduce leakage by 10% in distribution system`,
+                    isHot && isRaining ? 
+                        `Monitor water quality closely due to potential runoff contamination in current wet conditions` : 
+                        `Optimize pumping schedules to utilize off-peak electricity in ${location}'s distribution network`,
+                    temp > 33 ? 
+                        `Issue public advisories to increase daily water intake during extreme heat conditions in ${location}` : 
+                        `Conduct targeted leak detection in older neighborhoods to improve supply efficiency`
+                ],
+                industry: [
+                    isDry ? 
+                        `Reduce allocation to non-essential industrial processes by 20% during current dry conditions in ${location}` : 
+                        `Maintain standard allocations while promoting adoption of water-efficient technologies`,
+                    isRaining ? 
+                        `Encourage rainwater harvesting for industrial facilities in ${location} during current wet period` : 
+                        `Implement graduated water pricing for industries based on consumption efficiency metrics`,
+                    isHot ? 
+                        `Prioritize closed-loop cooling systems for manufacturing in current high-temperature conditions` : 
+                        `Facilitate water audits for the top 5 water-consuming industries in ${location}`,
+                    (isHot || isDry) ? 
+                        `Mandate minimum 40% water recycling rates for textile and chemical industries during water stress period` : 
+                        `Develop industrial water exchange networks among compatible industries in ${location} industrial zones`
+                ]
+            };
+            
+            return recommendations;
+        }
+        
+        // Fallback recommendations if Gemini API fails
+        function getFallbackRecommendations(weatherData) {
+            const current = weatherData.current;
+            const temp = current.main.temp;
+            const humidity = current.main.humidity;
+            
+            return {
+                agriculture: [
+                    "Implement drip irrigation for vegetable crops to reduce water usage by 30%",
+                    "Shift 5% of water allocation from rice to more water-efficient crops",
+                    "Schedule irrigation during early morning or late evening to reduce evaporation",
+                    "Install soil moisture sensors to optimize irrigation timing"
+                ],
+                drinking: [
+                    "Increase water treatment capacity in North district by 10%",
+                    "Implement water-saving campaigns in high-consumption areas",
+                    "Repair leaking pipelines in East district to reduce 15% water loss",
+                    "Install smart water meters in all districts for real-time monitoring"
+                ],
+                industry: [
+                    "Implement water recycling systems in textile industries to reduce consumption by 30%",
+                    "Encourage zero liquid discharge policies in chemical industries",
+                    "Provide incentives for water-efficient technology adoption",
+                    "Mandate water audits for high-consumption industries"
+                ]
+            };
+        }
+        
+        // Update detailed recommendation in modals
+        function updateDetailedRecommendations(recommendations) {
+            const agricultureRecsHTML = `
+                <ul>
+                    ${recommendations.agriculture.map(rec => `<li>${rec}</li>`).join('')}
+                </ul>
+            `;
+            
+            const drinkingRecsHTML = `
+                <ul>
+                    ${recommendations.drinking.map(rec => `<li>${rec}</li>`).join('')}
+                </ul>
+            `;
+            
+            const industryRecsHTML = `
+                <ul>
+                    ${recommendations.industry.map(rec => `<li>${rec}</li>`).join('')}
+                </ul>
+            `;
+            
+            agricultureAIRecs.innerHTML = agricultureRecsHTML;
+            drinkingAIRecs.innerHTML = drinkingRecsHTML;
+            industryAIRecs.innerHTML = industryRecsHTML;
+            
+            // Initialize or update charts with new data
+            initCharts();
+        }
+
+        // Run scenario for resource optimization
+        runScenarioBtn.addEventListener('click', () => {
+            const scenarioType = scenarioSelect.value;
+            
+            if (!weatherData) {
+                scenarioResults.innerHTML = `<div class="alert">Please fetch weather data for a location first!</div>`;
+                scenarioResults.style.display = 'block';
+                return;
+            }
+            
+            const location = weatherData.current.name;
+            const current = weatherData.current;
+            const temp = current.main.temp;
+            const humidity = current.main.humidity;
+            
+            let result = '';
+            
+            switch(scenarioType) {
+                case 'drought':
+                    result = `
+                        <h3>Drought Scenario Results for ${location}</h3>
+                        <p>Under sustained drought conditions, our models predict:</p>
+                        <ul>
+                            <li>Agricultural water needs to be reduced by 30% - prioritize drip irrigation and drought-resistant crops</li>
+                            <li>Drinking water requires 20% increased allocation - implement conservation measures</li>
+                            <li>Industrial water must be reduced by 45% - mandate recycling and efficiency measures</li>
+                        </ul>
+                        <p>Recommended Water Allocation:</p>
+                        <div style="display: flex; margin: 10px 0;">
+                            <div style="background-color: #36b37e; height: 30px; width: 42%; display: flex; align-items: center; justify-content: center; color: white;">Agriculture: 42%</div>
+                            <div style="background-color: #2684ff; height: 30px; width: 45%; display: flex; align-items: center; justify-content: center; color: white;">Drinking: 45%</div>
+                            <div style="background-color: #ff5630; height: 30px; width: 13%; display: flex; align-items: center; justify-content: center; color: white;">Industry: 13%</div>
+                        </div>
+                        <p><strong>Emergency measures required:</strong> Water rationing, public awareness campaigns, and irrigation scheduling adjustments.</p>
+                    `;
+                    break;
+                    
+                case 'flood':
+                    result = `
+                        <h3>Excess Rainfall Scenario Results for ${location}</h3>
+                        <p>With excessive rainfall conditions, our models predict:</p>
+                        <ul>
+                            <li>Agricultural water can be primarily sourced from rainfall - implement proper drainage</li>
+                            <li>Drinking water requires careful treatment due to potential contamination</li>
+                            <li>Industrial allocation can be increased temporarily</li>
+                        </ul>
+                        <p>Recommended Water Allocation:</p>
+                        <div style="display: flex; margin: 10px 0;">
+                            <div style="background-color: #36b37e; height: 30px; width: 35%; display: flex; align-items: center; justify-content: center; color: white;">Agriculture: 35%</div>
+                            <div style="background-color: #2684ff; height: 30px; width: 28%; display: flex; align-items: center; justify-content: center; color: white;">Drinking: 28%</div>
+                            <div style="background-color: #ff5630; height: 30px; width: 37%; display: flex; align-items: center; justify-content: center; color: white;">Industry: 37%</div>
+                        </div>
+                        <p><strong>Water quality measures required:</strong> Increased filtration and monitoring of drinking water sources, flood control infrastructure activation.</p>
+                    `;
+                    break;
+                    
+                case 'normal':
+                default:
+                    // Get the current allocations from the display
+                    const agricultureAlloc = parseInt(document.querySelector('.agriculture').textContent);
+                    const drinkingAlloc = parseInt(document.querySelector('.drinking').textContent);
+                    const industryAlloc = parseInt(document.querySelector('.industry').textContent);
+                    
+                    result = `
+                        <h3>Normal Conditions Scenario Results for ${location}</h3>
+                        <p>Under current conditions (${temp}°C, ${humidity}% humidity), our models support:</p>
+                        <ul>
+                            <li>Maintaining the current agricultural allocation with regular monitoring</li>
+                            <li>Standard drinking water supply with quality maintenance</li>
+                            <li>Normal industrial allocation with efficiency incentives</li>
+                        </ul>
+                        <p>Current Optimal Water Allocation:</p>
+                        <div style="display: flex; margin: 10px 0;">
+                            <div style="background-color: #36b37e; height: 30px; width: ${agricultureAlloc}%; display: flex; align-items: center; justify-content: center; color: white;">Agriculture: ${agricultureAlloc}%</div>
+                            <div style="background-color: #2684ff; height: 30px; width: ${drinkingAlloc}%; display: flex; align-items: center; justify-content: center; color: white;">Drinking: ${drinkingAlloc}%</div>
+                            <div style="background-color: #ff5630; height: 30px; width: ${industryAlloc}%; display: flex; align-items: center; justify-content: center; color: white;">Industry: ${industryAlloc}%</div>
+                        </div>
+                        <p><strong>Recommended focus:</strong> Continued efficiency improvements, preventative maintenance of infrastructure, and water conservation education.</p>
+                    `;
+                    break;
+            }
+            
+            scenarioResults.innerHTML = result;
+            scenarioResults.style.display = 'block';
+            
+            // Add real-time date/time stamp to the scenario
+            const timestamp = document.createElement('p');
+            timestamp.style.marginTop = '10px';
+            timestamp.style.fontSize = '0.8rem';
+            timestamp.style.color = '#5e6c84';
+            timestamp.textContent = `Scenario run on: ${new Date().toLocaleString()}`;
+            scenarioResults.appendChild(timestamp);
+        });
+
+        // Initialize charts in modal windows
+        function initCharts() {
+            // Set up agriculture chart
+            if (agricultureChart) {
+                agricultureChart.destroy();
+            }
+            
+            agricultureChart = new Chart(
+                document.getElementById('agricultureChart').getContext('2d'),
+                {
+                    type: 'bar',
+                    data: {
+                        labels: ['Rice', 'Wheat', 'Vegetables', 'Fruits'],
+                        datasets: [
+                            {
+                                label: 'Current Allocation (%)',
+                                backgroundColor: 'rgba(54, 179, 126, 0.8)',
+                                data: [45, 30, 20, 5]
+                            },
+                            {
+                                label: 'Recommended Allocation (%)',
+                                backgroundColor: 'rgba(54, 179, 126, 0.4)',
+                                data: [40, 25, 25, 10]
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Agricultural Water Allocation by Crop Type'
+                            }
+                        }
+                    }
+                }
+            );
+            
+            // Set up drinking water chart
+            if (drinkingChart) {
+                drinkingChart.destroy();
+            }
+            
+            drinkingChart = new Chart(
+                document.getElementById('drinkingChart').getContext('2d'),
+                {
+                    type: 'bar',
+                    data: {
+                        labels: ['North', 'South', 'East', 'West'],
+                        datasets: [
+                            {
+                                label: 'Current Supply (MLD)',
+                                backgroundColor: 'rgba(38, 132, 255, 0.8)',
+                                data: [45, 60, 35, 40]
+                            },
+                            {
+                                label: 'Recommended Supply (MLD)',
+                                backgroundColor: 'rgba(38, 132, 255, 0.4)',
+                                data: [50, 65, 40, 45]
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Drinking Water Supply by District'
+                            }
+                        }
+                    }
+                }
+            );
+            
+            // Set up industry chart
+            if (industryChart) {
+                industryChart.destroy();
+            }
+            
+            industryChart = new Chart(
+                document.getElementById('industryChart').getContext('2d'),
+                {
+                    type: 'bar',
+                    data: {
+                        labels: ['Textiles', 'Food Processing', 'Chemical', 'Electronics'],
+                        datasets: [
+                            {
+                                label: 'Current Allocation (%)',
+                                backgroundColor: 'rgba(255, 86, 48, 0.8)',
+                                data: [35, 30, 25, 10]
+                            },
+                            {
+                                label: 'Recommended Allocation (%)',
+                                backgroundColor: 'rgba(255, 86, 48, 0.4)',
+                                data: [25, 30, 20, 15]
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Industrial Water Allocation by Industry Type'
+                            }
+                        }
+                    }
+                }
+            );
+        }
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+            // Initialize charts when modal opens
+            if (modalId === 'agricultureModal' || modalId === 'drinkingModal' || modalId === 'industryModal') {
+                setTimeout(() => {
+                    initCharts();
+                }, 100);
+            }
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        };
+        
+        // Helper function for array average
+        function average(...values) {
+            return values.reduce((sum, val) => sum + val, 0) / values.length;
+        }
+        
+        // Add real-time date functionality
+        function updateDateTime() {
+            const now = new Date();
+            const dateTimeString = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+            
+            // Only update if weatherInfo has content
+            if (weatherInfo.innerHTML !== '' && !weatherInfo.innerHTML.includes('alert') && !weatherInfo.innerHTML.includes('loading')) {
+                const locationDisplay = weatherInfo.querySelector('.location-display');
+                if (locationDisplay) {
+                    const dateElement = locationDisplay.querySelector('p');
+                    if (dateElement) {
+                        dateElement.textContent = dateTimeString;
+                    }
+                }
+            }
+            
+            // Update date in scenario results if visible
+            if (scenarioResults.style.display === 'block') {
+                const timestamp = scenarioResults.querySelector('p:last-child');
+                if (timestamp && timestamp.style.fontSize === '0.8rem') {
+                    timestamp.textContent = `Scenario run on: ${dateTimeString}`;
+                }
+            }
+            
+            // Continue updating
+            setTimeout(updateDateTime, 1000);
+        }
+        
+        // Start the real-time clock
+        updateDateTime();
+        
+        // Initialize the charts
+        initCharts();
+    </script>
+</body>
+</html>
